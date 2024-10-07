@@ -2,7 +2,7 @@
 
 namespace SmartCity.Domain.Entities;
 
-#pragma warning disable
+#nullable disable
 
 public partial class User : BaseEntity {
     public int UserId { get; set; }
@@ -13,5 +13,5 @@ public partial class User : BaseEntity {
 
     public string PasswordHash { get; set; }
 
-    public virtual ICollection<PoiReview> PoiReviews { get; set; } = new List<PoiReview>();
+    public virtual ICollection<PoiReview> PoiReviews { get; set; } = [];
 }

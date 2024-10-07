@@ -2,7 +2,7 @@
 
 namespace SmartCity.Domain.Entities;
 
-#pragma warning disable
+#nullable disable
 
 public partial class PoiPhoto : BaseEntity {
     public int PhotoId { get; set; }

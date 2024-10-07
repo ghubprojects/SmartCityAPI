@@ -5,8 +5,8 @@ using SmartCity.Infrastructure.DataContext;
 
 namespace SmartCity.Infrastructure.Repositories;
 
-public class UserRepository(SmartCityContext context) : IUserRepository {
-    private readonly SmartCityContext _context = context;
+public class UserRepository(AppDbContext context) : IUserRepository {
+    private readonly AppDbContext _context = context;
 
     public async Task<User?> GetUserByIdAsync(int userId) {
         return await _context.Users

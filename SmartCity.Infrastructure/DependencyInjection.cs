@@ -1,13 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Npgsql;
+using MongoDB.Driver;
 using SmartCity.Application.Abstractions.Repositories;
 using SmartCity.Application.Abstractions.Repositories.GisOsm;
 using SmartCity.Infrastructure.DataContext;
 using SmartCity.Infrastructure.Repositories;
 using SmartCity.Infrastructure.Repositories.GisOsm;
-using System.Data;
 
 namespace SmartCity.Infrastructure;
 
@@ -23,26 +22,21 @@ public static class DependencyInjection {
 
     private static IServiceCollection AddDatabase(this IServiceCollection services) {
         // Configure EF Core DbContext
-        services.AddDbContext<SmartCityContext>((serviceProvider, options) => {
-            var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-            options.UseNpgsql(configuration.GetConnectionString(SMART_CITY_CONTEXT_KEY));
+        services.AddDbContext<AppDbContext>((sp, options) => {
+            options.UseNpgsql(sp.GetRequiredService<IConfiguration>().GetConnectionString(SMART_CITY_CONTEXT_KEY));
         });
 
-        // Configure Dapper IDbConnection
-        services.AddScoped<IDbConnection>(serviceProvider => {
-            var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-            var connectionString = configuration.GetConnectionString(GIS_OSM_CONTEXT_KEY);
-            return new NpgsqlConnection(connectionString);
-        });
+        // Configure MongoDb client and context
+        services.AddSingleton<IMongoClient>(sp => 
+            new MongoClient(sp.GetRequiredService<IConfiguration>().GetConnectionString(GIS_OSM_CONTEXT_KEY)));
+        services.AddScoped<GisOsmContext>();
 
         return services;
     }
 
     private static IServiceCollection AddServices(this IServiceCollection services) {
-        services.AddScoped<IGisOsmPoiRepository, GisOsmPoiRepository>();
+        services.AddScoped<IOsmPoiRepository, OsmPoiRepository>();
         services.AddScoped<IPoiDetailRepository, PoiDetailsRepository>();
-        services.AddScoped<IPoiPhotoRepository, PoiPhotoRepository>();
-        services.AddScoped<IPoiReviewRepository, PoiReviewRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         return services;
     }

@@ -3,10 +3,10 @@ using SmartCity.Domain.Entities;
 
 namespace SmartCity.Infrastructure.DataContext;
 
-public partial class SmartCityContext : DbContext {
-    public SmartCityContext() { }
+public partial class AppDbContext : DbContext {
+    public AppDbContext() { }
 
-    public SmartCityContext(DbContextOptions<SmartCityContext> options) : base(options) { }
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     public virtual DbSet<PoiDetail> PoiDetails { get; set; }
 
@@ -27,7 +27,10 @@ public partial class SmartCityContext : DbContext {
             entity.Property(e => e.DetailId)
                 .ValueGeneratedNever()
                 .HasColumnName("detail_id");
-            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.OsmId)
+                .HasColumnName("osm_id");
+            entity.Property(e => e.CreatedBy)
+                .HasColumnName("created_by");
             entity.Property(e => e.CreatedDate)
                 .HasDefaultValueSql("now()")
                 .HasColumnType("timestamp without time zone")
@@ -35,8 +38,10 @@ public partial class SmartCityContext : DbContext {
             entity.Property(e => e.DeleteFlag)
                 .HasDefaultValue(false)
                 .HasColumnName("delete_flag");
-            entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.LastModifiedBy).HasColumnName("last_modified_by");
+            entity.Property(e => e.Description)
+                .HasColumnName("description");
+            entity.Property(e => e.LastModifiedBy)
+                .HasColumnName("last_modified_by");
             entity.Property(e => e.LastModifiedDate)
                 .HasDefaultValueSql("now()")
                 .HasColumnType("timestamp without time zone")
@@ -44,7 +49,6 @@ public partial class SmartCityContext : DbContext {
             entity.Property(e => e.OpeningHours)
                 .HasMaxLength(100)
                 .HasColumnName("opening_hours");
-            entity.Property(e => e.PoiGid).HasColumnName("poi_gid");
         });
 
         modelBuilder.Entity<PoiPhoto>(entity => {
@@ -58,7 +62,8 @@ public partial class SmartCityContext : DbContext {
             entity.Property(e => e.Caption)
                 .HasMaxLength(255)
                 .HasColumnName("caption");
-            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.CreatedBy)
+                .HasColumnName("created_by");
             entity.Property(e => e.CreatedDate)
                 .HasDefaultValueSql("now()")
                 .HasColumnType("timestamp without time zone")
@@ -66,13 +71,16 @@ public partial class SmartCityContext : DbContext {
             entity.Property(e => e.DeleteFlag)
                 .HasDefaultValue(false)
                 .HasColumnName("delete_flag");
-            entity.Property(e => e.DetailId).HasColumnName("detail_id");
-            entity.Property(e => e.LastModifiedBy).HasColumnName("last_modified_by");
+            entity.Property(e => e.DetailId)
+                .HasColumnName("detail_id");
+            entity.Property(e => e.LastModifiedBy)
+                .HasColumnName("last_modified_by");
             entity.Property(e => e.LastModifiedDate)
                 .HasDefaultValueSql("now()")
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("last_modified_date");
-            entity.Property(e => e.Url).HasColumnName("url");
+            entity.Property(e => e.Url)
+                .HasColumnName("url");
 
             entity.HasOne(d => d.Detail).WithMany(p => p.PoiPhotos)
                 .HasForeignKey(d => d.DetailId)
@@ -88,8 +96,10 @@ public partial class SmartCityContext : DbContext {
             entity.Property(e => e.ReviewId)
                 .ValueGeneratedNever()
                 .HasColumnName("review_id");
-            entity.Property(e => e.Comment).HasColumnName("comment");
-            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.Comment)
+                .HasColumnName("comment");
+            entity.Property(e => e.CreatedBy)
+                .HasColumnName("created_by");
             entity.Property(e => e.CreatedDate)
                 .HasDefaultValueSql("now()")
                 .HasColumnType("timestamp without time zone")
@@ -97,14 +107,18 @@ public partial class SmartCityContext : DbContext {
             entity.Property(e => e.DeleteFlag)
                 .HasDefaultValue(false)
                 .HasColumnName("delete_flag");
-            entity.Property(e => e.DetailId).HasColumnName("detail_id");
-            entity.Property(e => e.LastModifiedBy).HasColumnName("last_modified_by");
+            entity.Property(e => e.DetailId)
+                .HasColumnName("detail_id");
+            entity.Property(e => e.LastModifiedBy)
+                .HasColumnName("last_modified_by");
             entity.Property(e => e.LastModifiedDate)
                 .HasDefaultValueSql("now()")
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("last_modified_date");
-            entity.Property(e => e.Rating).HasColumnName("rating");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.Rating)
+                .HasColumnName("rating");
+            entity.Property(e => e.UserId)
+                .HasColumnName("user_id");
 
             entity.HasOne(d => d.Detail).WithMany(p => p.PoiReviews)
                 .HasForeignKey(d => d.DetailId)
@@ -129,7 +143,8 @@ public partial class SmartCityContext : DbContext {
             entity.Property(e => e.UserId)
                 .ValueGeneratedNever()
                 .HasColumnName("user_id");
-            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.CreatedBy)
+                .HasColumnName("created_by");
             entity.Property(e => e.CreatedDate)
                 .HasDefaultValueSql("now()")
                 .HasColumnType("timestamp without time zone")
@@ -140,7 +155,8 @@ public partial class SmartCityContext : DbContext {
             entity.Property(e => e.Email)
                 .HasMaxLength(100)
                 .HasColumnName("email");
-            entity.Property(e => e.LastModifiedBy).HasColumnName("last_modified_by");
+            entity.Property(e => e.LastModifiedBy)
+                .HasColumnName("last_modified_by");
             entity.Property(e => e.LastModifiedDate)
                 .HasDefaultValueSql("now()")
                 .HasColumnType("timestamp without time zone")

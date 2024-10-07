@@ -2,7 +2,7 @@
 
 namespace SmartCity.Domain.Entities;
 
-#pragma warning disable
+#nullable disable
 
 public partial class PoiReview : BaseEntity {
     public int ReviewId { get; set; }

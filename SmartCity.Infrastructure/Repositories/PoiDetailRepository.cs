@@ -4,35 +4,25 @@ using SmartCity.Domain.Entities;
 using SmartCity.Infrastructure.DataContext;
 
 namespace SmartCity.Infrastructure.Repositories;
-public class PoiDetailsRepository(SmartCityContext context) : IPoiDetailRepository {
-    private readonly SmartCityContext _context = context;
 
-    public async Task<List<PoiDetail>> GetPoiDetailsByGidsAsync(List<int> poiGids) {
+public class PoiDetailsRepository(AppDbContext context) : IPoiDetailRepository {
+    private readonly AppDbContext _context = context;
+
+    public async Task<List<PoiDetail>> GetDataListAsync(List<string> osmIds) {
         return await _context.PoiDetails
              .Include(d => d.PoiPhotos)
              .Include(d => d.PoiReviews)
-             .Where(p => poiGids.Contains(p.PoiGid) && !p.DeleteFlag)
+             .AsSplitQuery()
+             .Where(p => osmIds.Contains(p.OsmId) && !p.DeleteFlag)
              .ToListAsync();
     }
 
-    public async Task<PoiDetail?> GetPoiDetailsByGidAsync(int poiGid) {
+    public async Task<PoiDetail?> GetDataAsync(string osmId) {
         return await _context.PoiDetails
             .Include(d => d.PoiPhotos)
             .Include(d => d.PoiReviews)
-            .FirstOrDefaultAsync(p => p.PoiGid == poiGid && !p.DeleteFlag);
-    }
-
-    public async Task UpdatePoiDetailsAsync(PoiDetail poiDetails) {
-        _context.PoiDetails.Update(poiDetails);
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task DeletePoiDetailsAsync(int poiGid) {
-        var poiDetails = await _context.PoiDetails.FirstOrDefaultAsync(p => p.PoiGid == poiGid);
-        if (poiDetails != null) {
-            poiDetails.DeleteFlag = true;
-            await _context.SaveChangesAsync();
-        }
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(p => p.OsmId == osmId && !p.DeleteFlag);
     }
 }
 
