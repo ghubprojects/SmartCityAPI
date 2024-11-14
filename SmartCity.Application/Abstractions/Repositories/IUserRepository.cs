@@ -3,9 +3,9 @@
 namespace SmartCity.Application.Abstractions.Repositories;
 
 public interface IUserRepository {
-    Task<User?> GetUserByIdAsync(int userId);
-    Task<User?> GetUserByUsernameAsync(string username);
-    Task AddUserAsync(User user);
-    Task UpdateUserAsync(User user);
+    Task<MUser?> GetUserByIdAsync(int userId);
+    Task<MUser?> GetUserByUsernameAsync(string username);
+    Task AddUserAsync(MUser user);
+    Task UpdateUserAsync(MUser user);
     Task DeleteUserAsync(int userId);
 }

@@ -14,7 +14,7 @@ public static class DependencyInjection {
     }
 
     private static IServiceCollection AddServices(this IServiceCollection services) {
-        services.AddScoped<IPoiService, PoiService>();
+        services.AddScoped<IPlaceService, PlaceService>();
         return services;
     }
 }

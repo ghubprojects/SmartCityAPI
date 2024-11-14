@@ -5,6 +5,7 @@ using MongoDB.Driver;
 using SmartCity.Application.Abstractions.Repositories;
 using SmartCity.Application.Abstractions.Repositories.GisOsm;
 using SmartCity.Infrastructure.DataContext;
+using SmartCity.Infrastructure.DataSeeding;
 using SmartCity.Infrastructure.Repositories;
 using SmartCity.Infrastructure.Repositories.GisOsm;
 
@@ -25,6 +26,7 @@ public static class DependencyInjection {
         services.AddDbContext<AppDbContext>((sp, options) => {
             options.UseNpgsql(sp.GetRequiredService<IConfiguration>().GetConnectionString(SMART_CITY_CONTEXT_KEY));
         });
+        services.AddScoped<AppDbSeeder>();
 
         // Configure MongoDb client and context
         services.AddSingleton<IMongoClient>(sp => 
@@ -35,8 +37,8 @@ public static class DependencyInjection {
     }
 
     private static IServiceCollection AddServices(this IServiceCollection services) {
-        services.AddScoped<IOsmPoiRepository, OsmPoiRepository>();
-        services.AddScoped<IPoiDetailRepository, PoiDetailsRepository>();
+        services.AddScoped<IPoiRepository, PoiRepository>();
+        services.AddScoped<IPlaceDetailRepository, PlaceDetailRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         return services;
     }

@@ -6,7 +6,7 @@ namespace SmartCity.Domain.Entities.GisOsm;
 
 #nullable disable
 
-public class OsmPoi {
+public class Poi {
     public ObjectId _id { get; set; }
 
     [BsonElement("type")]

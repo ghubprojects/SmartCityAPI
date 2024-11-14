@@ -2,7 +2,7 @@
 
 namespace SmartCity.Application.Abstractions.Repositories;
 
-public interface IPoiDetailRepository {
-    Task<List<PoiDetail>> GetDataListAsync(List<string> osmIds);
-    Task<PoiDetail?> GetDataAsync(string osmId);
+public interface IPlaceDetailRepository {
+    Task<List<MPlaceDetail>> GetDataListAsync(List<string> osmIds);
+    Task<MPlaceDetail?> GetDataAsync(string osmId);
 }

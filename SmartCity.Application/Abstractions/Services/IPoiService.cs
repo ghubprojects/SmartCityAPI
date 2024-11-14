@@ -2,6 +2,6 @@
 
 namespace SmartCity.Application.Abstractions.Services;
 
-public interface IPoiService {
-    Task<List<PoiDetailDto>> GetPoisNearLocation(double lat, double lon, string type, double distance);
+public interface IPlaceService {
+    Task<List<PlaceDetailDto>> GetPlacesNearLocationAsync(double lat, double lon, string type, double distance);
 }
