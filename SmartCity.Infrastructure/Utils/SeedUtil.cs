@@ -126,11 +126,7 @@ public static class SeedUtil {
     }
 
     public static string GetDescription(string key, string name) {
-        try {
-            return places.TryGetValue(key, out (string, string) value) ? string.Format(value.Item2, name) : key;
-        } catch (Exception) {
-            throw;
-        }
+        return places.TryGetValue(key, out (string, string) value) ? string.Format(value.Item2, name) : key;
     }
 
     public static string GetOpeningHours(string type) {
