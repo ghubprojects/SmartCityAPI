@@ -12,6 +12,11 @@ public class AppDbSeeder(AppDbContext context, GisOsmContext gisOsmContext) {
     private readonly GisOsmContext _gisOsmContext = gisOsmContext;
     private readonly Random _random = new();
 
+    public async Task InitialiseAsync() {
+        if (_context.Database.IsRelational())
+            await _context.Database.MigrateAsync();
+    }
+
     public async Task SeedAsync() {
         _context.Database.EnsureCreated();
 

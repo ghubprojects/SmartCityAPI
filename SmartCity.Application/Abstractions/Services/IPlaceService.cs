@@ -3,5 +3,5 @@
 namespace SmartCity.Application.Abstractions.Services;
 
 public interface IPlaceService {
-    Task<List<PlaceDetailDto>> GetPlacesNearLocationAsync(double lat, double lon, string type, double distance);
+    Task<List<PlaceDetailDto>> GetPlacesAsync(string keyword, double lat, double lon, double distance);
 }

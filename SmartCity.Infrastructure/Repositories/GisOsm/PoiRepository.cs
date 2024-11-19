@@ -10,12 +10,20 @@ public class PoiRepository(GisOsmContext context) : IPoiRepository {
     private readonly GisOsmContext _context = context;
 
     public async Task<List<Poi>> GetNearSphereAsync(double lat, double lon, string type, double distance) {
-        var point = GeoJson.Point(GeoJson.Position(lon, lat));
-        var nearSphereFilter = Builders<Poi>.Filter.NearSphere(x => x.Geometry, point, distance);
-        var typeFilter = Builders<Poi>.Filter.Eq(x => x.Properties.Fclass, type);
-        var filter = !string.IsNullOrEmpty(type)
-            ? Builders<Poi>.Filter.And(nearSphereFilter, typeFilter)
-            : nearSphereFilter;
+        var builder = Builders<Poi>.Filter;
+        var location = GeoJson.Point(GeoJson.Position(lon, lat));
+        var nearSphereFilter = builder.NearSphere(x => x.Geometry, location, distance);
+        FilterDefinition<Poi> filter = nearSphereFilter;
+
+        if (!string.IsNullOrEmpty(type)) {
+            var typeFilter = builder.Eq(x => x.Properties.Fclass, type);
+            filter = builder.And(nearSphereFilter, typeFilter);
+        }
+        return await _context.Poi.Find(filter).ToListAsync();
+    }
+
+    public async Task<List<Poi>> GetWithinAreaAsync(GeoJsonGeometry<GeoJson2DCoordinates> areaGeometry) {
+        var filter = Builders<Poi>.Filter.GeoWithin(x => x.Geometry, areaGeometry);
         return await _context.Poi.Find(filter).ToListAsync();
     }
 }

@@ -7,7 +7,6 @@ namespace SmartCity.Application;
 
 public static class DependencyInjection {
     public static IServiceCollection AddApplication(this IServiceCollection services) {
-        services.AddAutoMapper(Assembly.GetExecutingAssembly());
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
         services.AddServices();
         return services;
@@ -15,6 +14,7 @@ public static class DependencyInjection {
 
     private static IServiceCollection AddServices(this IServiceCollection services) {
         services.AddScoped<IPlaceService, PlaceService>();
+        services.AddScoped<IGeometryService, GeometryService>();
         return services;
     }
 }

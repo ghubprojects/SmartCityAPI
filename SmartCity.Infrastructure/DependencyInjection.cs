@@ -38,6 +38,8 @@ public static class DependencyInjection {
 
     private static IServiceCollection AddServices(this IServiceCollection services) {
         services.AddScoped<IPoiRepository, PoiRepository>();
+        services.AddScoped<IGadmRepository, GadmRepository>();
+
         services.AddScoped<IPlaceDetailRepository, PlaceDetailRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         return services;
