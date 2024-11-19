@@ -11,7 +11,10 @@ public class PlaceDetailRepository(AppDbContext context) : IPlaceDetailRepositor
     private IQueryable<MPlaceDetail> GetQueryAsync() {
         return _context.MPlaceDetails
              .Include(d => d.TPlacePhotos)
+             .ThenInclude(p => p.File)
              .Include(d => d.TPlaceReviews)
+             .ThenInclude(r => r.User)
+             .ThenInclude(u => u.Avatar)
              .AsSplitQuery();
     }
 

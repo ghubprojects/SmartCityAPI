@@ -22,5 +22,7 @@ public partial class MFile {
 
     public bool DeleteFlag { get; set; }
 
+    public virtual ICollection<MUser> MUsers { get; set; } = new List<MUser>();
+
     public virtual ICollection<TPlacePhoto> TPlacePhotos { get; set; } = new List<TPlacePhoto>();
 }

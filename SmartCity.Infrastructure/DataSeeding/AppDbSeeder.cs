@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 using SmartCity.Domain.Entities;
 using SmartCity.Domain.Entities.GisOsm;
@@ -15,21 +15,71 @@ public class AppDbSeeder(AppDbContext context, GisOsmContext gisOsmContext) {
     public async Task SeedAsync() {
         _context.Database.EnsureCreated();
 
+        await SeedAdministrativeAreaAsync();
+        await SeedFileAsync();
         await SeedUserAsync();
         await SeedPlaceTypeAsync();
         await SeedPlaceAsync();
+        await SeedPhotoAndReviewAsync();
 
         _context.ChangeTracker.Clear();
+    }
+
+    private async Task SeedAdministrativeAreaAsync() {
+        if (await _context.MAdministrativeAreas.AnyAsync())
+            return;
+
+        var gadmLv1 = await _gisOsmContext.GadmLv1.Find(_ => true).ToListAsync();
+        var areaLv1 = gadmLv1.Select(area => new MAdministrativeArea {
+            AreaName = area.Properties.Name1,
+            AreaType = area.Properties.Type1,
+            EngType = area.Properties.EngType1,
+            ParentId = null
+        }).ToList();
+
+        await _context.MAdministrativeAreas.AddRangeAsync(areaLv1);
+        await _context.SaveChangesAsync();
+
+        var gadmLv2 = await _gisOsmContext.GadmLv2.Find(_ => true).ToListAsync();
+        var areaLv2 = gadmLv2.Select(area => new MAdministrativeArea {
+            AreaName = area.Properties.Name2,
+            AreaType = area.Properties.Type2,
+            EngType = area.Properties.EngType2,
+            ParentId = areaLv1.FirstOrDefault(a => a.AreaName == area.Properties.Name1)?.AreaId
+        }).ToList();
+
+        await _context.MAdministrativeAreas.AddRangeAsync(areaLv2);
+        await _context.SaveChangesAsync();
+    }
+
+    private async Task SeedFileAsync() {
+        if (await _context.MFiles.AnyAsync())
+            return;
+
+        var avatarFiles = SeedUtil.GetAvatarUrls().Select(url => new MFile {
+            FilePath = url,
+            FileName = new Uri(url).Segments[^1],
+        });
+        var placePhotos = SeedUtil.GetImageUrls().Select(url => new MFile {
+            FilePath = url,
+            FileName = new Uri(url).Segments[^1],
+        });
+
+        await _context.MFiles.AddRangeAsync(avatarFiles);
+        await _context.MFiles.AddRangeAsync(placePhotos);
+        await _context.SaveChangesAsync();
     }
 
     private async Task SeedUserAsync() {
         if (await _context.MUsers.AnyAsync())
             return;
 
+        var files = await _context.MFiles.AsNoTracking().ToListAsync();
         var users = Enumerable.Range(1, 20).Select(i => new MUser {
             Username = $"user{i:D2}",
             Email = $"user{i:D2}@gmail.com",
             PasswordHash = $"pass{i:D6}",
+            AvatarId = i
         }).ToList();
 
         await _context.MUsers.AddRangeAsync(users);
@@ -45,8 +95,8 @@ public class AppDbSeeder(AppDbContext context, GisOsmContext gisOsmContext) {
             .ToListAsync();
 
         var placeTypes = distinctFclasses.Select(fclass => new MPlaceType {
-            TypeName = SeedUtil.GetPlaceType(fclass),
-            Fclass = fclass
+            Fclass = fclass,
+            TypeName = SeedUtil.GetPlaceType(fclass)
         }).ToList();
 
         await _context.MPlaceTypes.AddRangeAsync(placeTypes);
@@ -57,24 +107,9 @@ public class AppDbSeeder(AppDbContext context, GisOsmContext gisOsmContext) {
         if (await _context.MPlaceDetails.AnyAsync())
             return;
 
-        // Cache users and existing files
-        var users = await _context.MUsers.AsNoTracking().ToListAsync();
-        var existingFileNames = (await _context.MFiles
-            .Select(file => file.FileName)
-            .ToListAsync())
-            .ToHashSet();
-
         var placeDetails = new List<MPlaceDetail>();
-        var files = new List<MFile>();
-        var placePhotos = new List<TPlacePhoto>();
-        var placeReviews = new List<TPlaceReview>();
+        var pois = _gisOsmContext.Poi.AsQueryable().AsNoTracking().ToList();
 
-        var pois = _gisOsmContext.Poi.AsQueryable()
-            .AsNoTracking()
-            .ToList();
-
-
-        // Collect MPlaceDetail records first
         foreach (var poi in pois) {
             var placeDetail = new MPlaceDetail {
                 OsmId = poi.Properties.OsmId,
@@ -84,32 +119,35 @@ public class AppDbSeeder(AppDbContext context, GisOsmContext gisOsmContext) {
             placeDetails.Add(placeDetail);
         }
 
-        // Save MPlaceDetails to ensure they have generated IDs
         await _context.MPlaceDetails.AddRangeAsync(placeDetails);
         await _context.SaveChangesAsync();
+    }
 
-        var savedPlaceTypes = pois.ToDictionary(p => p.Properties.OsmId, p => p.Properties.Fclass);
+    private async Task SeedPhotoAndReviewAsync() {
+        if (await _context.TPlacePhotos.AnyAsync() || await _context.TPlaceReviews.AnyAsync())
+            return;
 
-        // Add MFile records and seed photos and reviews in batches
+        var files = await _context.MFiles.AsNoTracking().ToListAsync();
+        var placePhotos = new List<TPlacePhoto>();
+        var placeReviews = new List<TPlaceReview>();
+
+        var pois = _gisOsmContext.Poi.AsQueryable().AsNoTracking().ToList();
+        var placeTypeDict = pois.DistinctBy(p => p.Properties.OsmId)
+                                .ToDictionary(p => p.Properties.OsmId, p => p.Properties.Fclass);
+        var placeDetails = await _context.MPlaceDetails.AsNoTracking().ToListAsync();
+        var users = await _context.MUsers.AsNoTracking().ToListAsync();
+
         foreach (var placeDetail in placeDetails) {
-            var placeType = savedPlaceTypes[placeDetail.OsmId];
+            var placeType = placeTypeDict[placeDetail.OsmId];
             var imageUrls = SeedUtil.GetImageUrls(placeType);
 
-            var newFiles = imageUrls
-                .Where(url => !existingFileNames.Contains(new Uri(url).Segments[^1]))
-                .Select(url => new MFile {
-                    FileName = new Uri(url).Segments[^1],
-                    FilePath = url,
-                }).ToList();
-
-            files.AddRange(newFiles);
-            existingFileNames.UnionWith(newFiles.Select(f => f.FileName));
-
             placePhotos.AddRange(imageUrls
-                .Where(url => existingFileNames.Contains(new Uri(url).Segments[^1]))
-                .Select(url => new TPlacePhoto {
-                    DetailId = placeDetail.DetailId,
-                    FileId = files.First(f => f.FileName == new Uri(url).Segments[^1]).FileId,
+                .Select(url => {
+                    var savedFile = files.First(f => f.FilePath == url);
+                    return new TPlacePhoto {
+                        DetailId = placeDetail.DetailId,
+                        FileId = savedFile.FileId,
+                    };
                 }));
 
             var reviewEntities = SeedUtil.GetComments(placeType).Select(comment => new TPlaceReview {
@@ -122,17 +160,8 @@ public class AppDbSeeder(AppDbContext context, GisOsmContext gisOsmContext) {
             placeReviews.AddRange(reviewEntities);
         }
 
-        // Add and save all remaining entities in batch
-        await _context.MFiles.AddRangeAsync(files);
-        await _context.SaveChangesAsync();
-
-        await _context.TPlacePhotos.AddRangeAsync(placePhotos);
-        await _context.TPlaceReviews.AddRangeAsync(placeReviews);
-        await _context.SaveChangesAsync();
-
         await _context.TPlacePhotos.AddRangeAsync(placePhotos);
         await _context.TPlaceReviews.AddRangeAsync(placeReviews);
         await _context.SaveChangesAsync();
     }
-
 }

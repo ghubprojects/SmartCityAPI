@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-#nullable disable
-
 namespace SmartCity.Domain.Entities;
+
+#nullable disable
 
 public partial class TPlaceReview {
     public int ReviewId { get; set; }

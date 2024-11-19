@@ -1,5 +1,3 @@
-﻿using AutoMapper;
-using MongoDB.Driver.GeoJsonObjectModel;
 using SmartCity.Application.Abstractions.Repositories;
 using SmartCity.Application.Abstractions.Repositories.GisOsm;
 using SmartCity.Application.Abstractions.Services;
@@ -8,10 +6,8 @@ using SmartCity.Application.DTOs;
 namespace SmartCity.Application.Services;
 
 public class PlaceService(
-    IMapper mapper,
     IPoiRepository gisPlaceRepository,
     IPlaceDetailRepository poiDetailRepository) : IPlaceService {
-    private readonly IMapper _mapper = mapper;
     private readonly IPoiRepository _poiRepository = gisPlaceRepository;
     private readonly IPlaceDetailRepository _poiDetailRepository = poiDetailRepository;
 
@@ -21,18 +17,19 @@ public class PlaceService(
             return [];
         }
 
+        var result = new List<PlaceDetailDto>();
         var osmIds = pois.Select(x => x.Properties.OsmId).ToList();
         var poiDetails = await _poiDetailRepository.GetDataListAsync(osmIds);
         var poiDetailsDict = poiDetails
             .GroupBy(p => p.OsmId)
             .ToDictionary(g => g.Key, g => g.First());
-        var poiDetailDtos = pois.Select(poi => {
-            var dto = _mapper.Map<PlaceDetailDto>(poi);
+
+        foreach (var poi in pois) {
             if (poiDetailsDict.TryGetValue(poi.Properties.OsmId, out var poiDetail)) {
-                _mapper.Map(poiDetail, dto);
+                result.Add(new PlaceDetailDto(poi, poiDetail));
             }
-            return dto;
-        }).ToList();
-        return poiDetailDtos;
+        }
+
+        return result;
     }
 }

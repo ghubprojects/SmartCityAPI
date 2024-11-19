@@ -1,4 +1,3 @@
-﻿using AutoMapper;
 using MongoDB.Driver.GeoJsonObjectModel;
 using SmartCity.Domain.Entities;
 using SmartCity.Domain.Entities.GisOsm;
@@ -6,70 +5,41 @@ using SmartCity.Domain.Entities.GisOsm;
 namespace SmartCity.Application.DTOs;
 
 public class PlaceDetailDto {
-    public string DetailId { get; set; } = string.Empty;
+    public int DetailId { get; set; }
     public string Type { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
-    public double Longitude { get; set; }
-    public double Latitude { get; set; }
     public string Description { get; set; } = string.Empty;
     public string OpeningHours { get; set; } = string.Empty;
+    public double Longitude { get; set; }
+    public double Latitude { get; set; }
+    public double Rating { get; set; }
     public List<PlacePhotoDto> Photos { get; set; } = new();
     public List<PlaceReviewDto> Reviews { get; set; } = new();
-}
 
-public class PlacePhotoDto {
-    public int PhotoId { get; set; }
-    public string Caption { get; set; } = string.Empty;
-    public int FileId { get; set; } // Reference ID only, not full File object
-}
+    public PlaceDetailDto(Poi poi, MPlaceDetail mPlaceDetail) {
+        DetailId = mPlaceDetail.DetailId;
+        Type = poi.Properties.Fclass;
+        Name = poi.Properties.Name;
+        Description = mPlaceDetail.Description;
+        OpeningHours = mPlaceDetail.OpeningHours;
+        Longitude = GetLongitude(poi.Geometry);
+        Latitude = GetLatitude(poi.Geometry);
+        Rating = Math.Round(mPlaceDetail.TPlaceReviews.Average(x => x.Rating), 1);
 
-public class PlaceReviewDto {
-    public int ReviewId { get; set; }
-    public int Rating { get; set; }
-    public string Comment { get; set; } = string.Empty;
-    public int UserId { get; set; } // Reference ID only, not full User object
-}
-
-public class PlaceDetailDtoMappingProfile : Profile {
-    public PlaceDetailDtoMappingProfile() {
-        //CreateMap<Poi, PlaceDetailDto>()
-        //    .ForMember(dest => dest.DetailId, otp => otp.MapFrom(src => src.Properties.OsmId))
-        //    .ForMember(dest => dest.Type, otp => otp.MapFrom(src => src.Properties.Fclass))
-        //    .ForMember(dest => dest.Name, otp => otp.MapFrom(src => src.Properties.Name))
-        //    .ForMember(dest => dest.Latitude, otp => otp.MapFrom(src => GetLatitude(src.Geometry)))
-        //    .ForMember(dest => dest.Longitude, otp => otp.MapFrom(src => GetLongitude(src.Geometry)))
-        //    .ReverseMap();
-
-        //CreateMap<MPlaceDetail, PlaceDetailDto>()
-        //    .ForMember(dest => dest.Description, otp => otp.MapFrom(src => src.Description))
-        //    .ForMember(dest => dest.OpeningHours, otp => otp.MapFrom(src => src.OpeningHours))
-        //    .ForMember(dest => dest.Photos, opt => opt.MapFrom(src => src.TPlacePhotos.Select(x => new PlacePhotoDto() { })))
-        //    .ForMember(dest => dest.Reviews, opt => opt.MapFrom(src => src.TPlaceReviews.Select(x => new PlaceReviewDto() { })))
-        //    .ReverseMap();
-
-        CreateMap<Poi, PlaceDetailDto>()
-            .ForMember(dest => dest.DetailId, otp => otp.MapFrom(src => src.Properties.OsmId))
-            .ForMember(dest => dest.Type, otp => otp.MapFrom(src => src.Properties.Fclass))
-            .ForMember(dest => dest.Name, otp => otp.MapFrom(src => src.Properties.Name))
-            .ForMember(dest => dest.Latitude, otp => otp.MapFrom(src => GetLatitude(src.Geometry)))
-            .ForMember(dest => dest.Longitude, otp => otp.MapFrom(src => GetLongitude(src.Geometry)))
-            .ReverseMap();
-
-        CreateMap<MPlaceDetail, PlaceDetailDto>()
-            .ForMember(dest => dest.Description, otp => otp.MapFrom(src => src.Description))
-            .ForMember(dest => dest.OpeningHours, otp => otp.MapFrom(src => src.OpeningHours))
-            .ForMember(dest => dest.Photos, opt => opt.MapFrom(src => src.TPlacePhotos.Select(x => new PlacePhotoDto {
-                PhotoId = x.PhotoId,
-                Caption = x.Caption,
-                FileId = x.FileId // Only reference ID
-            })))
-            .ForMember(dest => dest.Reviews, opt => opt.MapFrom(src => src.TPlaceReviews.Select(x => new PlaceReviewDto {
-                ReviewId = x.ReviewId,
-                Rating = x.Rating,
-                Comment = x.Comment,
-                UserId = x.UserId // Only reference ID
-            })))
-            .ReverseMap();
+        Photos = mPlaceDetail.TPlacePhotos.Select(x => new PlacePhotoDto {
+            PhotoId = x.PhotoId,
+            Caption = x.Caption,
+            FileName = x.File.FileName,
+            FilePath = x.File.FilePath
+        }).ToList();
+        Reviews = mPlaceDetail.TPlaceReviews.Select(x => new PlaceReviewDto {
+            ReviewId = x.ReviewId,
+            Rating = x.Rating,
+            Comment = x.Comment,
+            UserName = x.User.Username,
+            UserAvatar = x.User.Avatar.FilePath,
+            CreatedDate = x.CreatedDate,
+        }).ToList();
     }
 
     private static double GetLatitude(GeoJsonGeometry<GeoJson2DCoordinates> geometry) => geometry switch {
@@ -83,4 +53,20 @@ public class PlaceDetailDtoMappingProfile : Profile {
         GeoJsonPolygon<GeoJson2DCoordinates> polygon => polygon.Coordinates.Exterior.Positions.First().X,
         _ => 0 // Default value for unsupported geometry types
     };
+}
+
+public class PlacePhotoDto {
+    public int PhotoId { get; set; }
+    public string Caption { get; set; } = string.Empty;
+    public string FileName { get; set; } = string.Empty;
+    public string FilePath { get; set; } = string.Empty;
+}
+
+public class PlaceReviewDto {
+    public int ReviewId { get; set; }
+    public int Rating { get; set; }
+    public string Comment { get; set; } = string.Empty;
+    public string UserName { get; set; } = string.Empty;
+    public string UserAvatar { get; set; } = string.Empty;
+    public DateTime CreatedDate { get; set; }
 }

@@ -14,6 +14,8 @@ public partial class MUser {
 
     public string PasswordHash { get; set; } = null!;
 
+    public int AvatarId { get; set; }
+
     public DateTime CreatedDate { get; set; }
 
     public string CreatedBy { get; set; }
@@ -23,6 +25,8 @@ public partial class MUser {
     public string LastModifiedBy { get; set; }
 
     public bool DeleteFlag { get; set; }
+
+    public virtual MFile Avatar { get; set; }
 
     public virtual ICollection<TPlaceReview> TPlaceReviews { get; set; } = new List<TPlaceReview>();
 }

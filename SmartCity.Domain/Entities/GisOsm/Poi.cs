@@ -16,10 +16,10 @@ public class Poi {
     public GeoJsonGeometry<GeoJson2DCoordinates> Geometry { get; set; }
 
     [BsonElement("properties")]
-    public Properties Properties { get; set; }
+    public PoiProperties Properties { get; set; }
 }
 
-public class Properties {
+public class PoiProperties {
     [BsonElement("osm_id")]
     public string OsmId { get; set; }
 
