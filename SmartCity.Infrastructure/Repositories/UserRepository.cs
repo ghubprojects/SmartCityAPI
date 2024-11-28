@@ -10,12 +10,11 @@ public class UserRepository(AppDbContext context) : IUserRepository {
 
     public async Task<MUser?> GetUserByIdAsync(int userId) {
         return await _context.MUsers
-            .FirstOrDefaultAsync(u => u.UserId.Equals(userId) && !u.DeleteFlag);
+            .FirstOrDefaultAsync(u => u.UserId.Equals(userId));
     }
 
     public async Task<MUser?> GetUserByUsernameAsync(string username) {
-        return await _context.MUsers
-            .FirstOrDefaultAsync(u => u.Username.Equals(username) && !u.DeleteFlag);
+        return await _context.MUsers.SingleOrDefaultAsync(u => u.Username == username);
     }
 
     public async Task AddUserAsync(MUser user) {

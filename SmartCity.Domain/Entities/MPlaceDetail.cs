@@ -12,6 +12,8 @@ public partial class MPlaceDetail {
 
     public string Description { get; set; }
 
+    public string Address { get; set; }
+
     public string OpeningHours { get; set; }
 
     public DateTime CreatedDate { get; set; }

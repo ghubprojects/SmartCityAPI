@@ -144,6 +144,10 @@ namespace SmartCity.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("DetailId"));
 
+                    b.Property<string>("Address")
+                        .HasColumnType("text")
+                        .HasColumnName("address");
+
                     b.Property<int>("CreatedBy")
                         .HasColumnType("integer")
                         .HasColumnName("created_by");
@@ -304,7 +308,7 @@ namespace SmartCity.Infrastructure.Migrations
 
                     b.HasIndex("AvatarId");
 
-                    b.HasIndex(new[] { "Email" }, "m_user_email_key")
+                    b.HasIndex(new[] { "Username" }, "m_user_name_key")
                         .IsUnique();
 
                     b.ToTable("m_user", (string)null);

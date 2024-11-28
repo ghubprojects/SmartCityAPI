@@ -9,18 +9,20 @@ public class PlaceDetailDto {
     public string Type { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
     public string OpeningHours { get; set; } = string.Empty;
     public double Longitude { get; set; }
     public double Latitude { get; set; }
     public double Rating { get; set; }
-    public List<PlacePhotoDto> Photos { get; set; } = new();
-    public List<PlaceReviewDto> Reviews { get; set; } = new();
+    public List<PlacePhotoDto> Photos { get; set; } = [];
+    public List<PlaceReviewDto> Reviews { get; set; } = [];
 
-    public PlaceDetailDto(Poi poi, MPlaceDetail mPlaceDetail) {
+    public PlaceDetailDto(Poi poi, MPlaceDetail mPlaceDetail, Dictionary<string, string> placeTypeDict) {
         DetailId = mPlaceDetail.DetailId;
-        Type = poi.Properties.Fclass;
+        Type = placeTypeDict.GetValueOrDefault(poi.Properties.Fclass) ?? string.Empty;
         Name = poi.Properties.Name;
         Description = mPlaceDetail.Description;
+        Address = mPlaceDetail.Address;
         OpeningHours = mPlaceDetail.OpeningHours;
         Longitude = GetLongitude(poi.Geometry);
         Latitude = GetLatitude(poi.Geometry);
@@ -37,7 +39,7 @@ public class PlaceDetailDto {
             Rating = x.Rating,
             Comment = x.Comment,
             UserName = x.User.Username,
-            UserAvatar = x.User.Avatar.FilePath,
+            UserAvatar = x.User.Avatar.FileName,
             CreatedDate = x.CreatedDate,
         }).ToList();
     }

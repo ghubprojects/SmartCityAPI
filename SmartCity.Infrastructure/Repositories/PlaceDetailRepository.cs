@@ -20,12 +20,12 @@ public class PlaceDetailRepository(AppDbContext context) : IPlaceDetailRepositor
 
     public async Task<List<MPlaceDetail>> GetDataListAsync(List<string> osmIds) {
         return await GetQueryAsync()
-             .Where(p => osmIds.Contains(p.OsmId) && !p.DeleteFlag)
+             .Where(p => osmIds.Contains(p.OsmId))
              .ToListAsync();
     }
 
     public async Task<MPlaceDetail?> GetDataAsync(string osmId) {
-        return await GetQueryAsync().FirstOrDefaultAsync(p => p.OsmId == osmId && !p.DeleteFlag);
+        return await GetQueryAsync().FirstOrDefaultAsync(p => p.OsmId == osmId);
     }
 }
 

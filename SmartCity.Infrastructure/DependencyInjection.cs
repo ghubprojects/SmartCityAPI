@@ -1,11 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
+using SmartCity.Application.Abstractions.Providers;
 using SmartCity.Application.Abstractions.Repositories;
 using SmartCity.Application.Abstractions.Repositories.GisOsm;
+using SmartCity.Infrastructure.Configurations;
 using SmartCity.Infrastructure.DataContext;
 using SmartCity.Infrastructure.DataSeeding;
+using SmartCity.Infrastructure.Providers;
 using SmartCity.Infrastructure.Repositories;
 using SmartCity.Infrastructure.Repositories.GisOsm;
 
@@ -29,9 +33,13 @@ public static class DependencyInjection {
         services.AddScoped<AppDbSeeder>();
 
         // Configure MongoDb client and context
-        services.AddSingleton<IMongoClient>(sp => 
+        services.AddSingleton<IMongoClient>(sp =>
             new MongoClient(sp.GetRequiredService<IConfiguration>().GetConnectionString(GIS_OSM_CONTEXT_KEY)));
         services.AddScoped<GisOsmContext>();
+
+        // Configure Jwt
+        services.ConfigureOptions<JwtOptionsSetup>();
+        services.ConfigureOptions<JwtBearerOptionsSetup>();
 
         return services;
     }
@@ -39,9 +47,10 @@ public static class DependencyInjection {
     private static IServiceCollection AddServices(this IServiceCollection services) {
         services.AddScoped<IPoiRepository, PoiRepository>();
         services.AddScoped<IGadmRepository, GadmRepository>();
-
         services.AddScoped<IPlaceDetailRepository, PlaceDetailRepository>();
+        services.AddScoped<IPlaceTypeRepository, PlaceTypeRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IJwtProvider, JwtProvider>();
         return services;
     }
 }

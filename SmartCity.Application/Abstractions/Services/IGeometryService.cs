@@ -3,5 +3,5 @@
 namespace SmartCity.Application.Abstractions.Services;
 
 public interface IGeometryService {
-    Task<GeoJsonGeometry<GeoJson2DCoordinates>?> GetGeometryAsync(string keyword, double lat, double lon);
+    Task<GeoJsonGeometry<GeoJson2DCoordinates>?> GetGeometryAsync(string area, double lat, double lon);
 }

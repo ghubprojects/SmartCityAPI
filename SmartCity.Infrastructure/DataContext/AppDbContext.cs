@@ -102,6 +102,7 @@ public partial class AppDbContext : DbContext {
                 .HasDefaultValue(false)
                 .HasColumnName("delete_flag");
             entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.Address).HasColumnName("address");
             entity.Property(e => e.LastModifiedBy).HasColumnName("last_modified_by");
             entity.Property(e => e.LastModifiedDate)
                 .HasDefaultValueSql("now()")
@@ -113,6 +114,8 @@ public partial class AppDbContext : DbContext {
             entity.Property(e => e.OsmId)
                 .HasMaxLength(12)
                 .HasColumnName("osm_id");
+
+            entity.HasQueryFilter(p => !p.DeleteFlag);
         });
 
         modelBuilder.Entity<MPlaceType>(entity => {
@@ -151,7 +154,7 @@ public partial class AppDbContext : DbContext {
 
             entity.ToTable("m_user");
 
-            entity.HasIndex(e => e.Email, "m_user_email_key").IsUnique();
+            entity.HasIndex(e => e.Username, "m_user_name_key").IsUnique();
 
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.AvatarId).HasColumnName("avatar_id");
@@ -185,6 +188,8 @@ public partial class AppDbContext : DbContext {
             entity.HasOne(d => d.Avatar).WithMany(p => p.MUsers)
                 .HasForeignKey(d => d.AvatarId)
                 .HasConstraintName("m_user_m_file_fk");
+
+            entity.HasQueryFilter(p => !p.DeleteFlag);
         });
 
         modelBuilder.Entity<TPlacePhoto>(entity => {
