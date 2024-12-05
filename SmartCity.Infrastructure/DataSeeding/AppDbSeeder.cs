@@ -95,11 +95,13 @@ public class AppDbSeeder(AppDbContext context, GisOsmContext gisOsmContext) {
         if (await _context.MPlaceTypes.AnyAsync())
             return;
 
-        var distinctFclasses = await _gisOsmContext.Poi
-            .Distinct<string>("Properties.Fclass", Builders<Poi>.Filter.Empty)
+        var fClassList = await _gisOsmContext.Poi.Aggregate()
+            .Group(p => p.Properties.Fclass, g => new { Fclass = g.Key, Count = g.Count() })
+            .SortByDescending(g => g.Count)
+            .Project(g => g.Fclass)
             .ToListAsync();
 
-        var placeTypes = distinctFclasses.Select(fclass => new MPlaceType {
+        var placeTypes = fClassList.Select(fclass => new MPlaceType {
             Fclass = fclass,
             TypeName = SeedUtil.GetPlaceType(fclass)
         }).ToList();

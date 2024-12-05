@@ -7,13 +7,19 @@ namespace SmartCity.WebApi.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("[controller]")]
+[Route("places")]
 public class PlacesController(IMediator mediator) : ControllerBase {
     private readonly IMediator _mediator = mediator;
 
     [HttpGet]
-    public async Task<IActionResult> Get([FromQuery] GetPlacesNearLocationQuery query) {
-        var result = await _mediator.Send(query);
+    public async Task<IActionResult> GetPlaces([FromQuery] GetPlaceRequest request) {
+        var result = await _mediator.Send(request);
+        return Ok(result);
+    }
+
+    [HttpGet("types")]
+    public async Task<IActionResult> GetPlaceTypes() {
+        var result = await _mediator.Send(new GetPlaceTypesRequest());
         return Ok(result);
     }
 }

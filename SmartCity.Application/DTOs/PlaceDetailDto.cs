@@ -27,21 +27,8 @@ public class PlaceDetailDto {
         Longitude = GetLongitude(poi.Geometry);
         Latitude = GetLatitude(poi.Geometry);
         Rating = Math.Round(mPlaceDetail.TPlaceReviews.Average(x => x.Rating), 1);
-
-        Photos = mPlaceDetail.TPlacePhotos.Select(x => new PlacePhotoDto {
-            PhotoId = x.PhotoId,
-            Caption = x.Caption,
-            FileName = x.File.FileName,
-            FilePath = x.File.FilePath
-        }).ToList();
-        Reviews = mPlaceDetail.TPlaceReviews.Select(x => new PlaceReviewDto {
-            ReviewId = x.ReviewId,
-            Rating = x.Rating,
-            Comment = x.Comment,
-            UserName = x.User.Username,
-            UserAvatar = x.User.Avatar.FileName,
-            CreatedDate = x.CreatedDate,
-        }).ToList();
+        Photos = mPlaceDetail.TPlacePhotos.Select(x => new PlacePhotoDto(x)).ToList();
+        Reviews = mPlaceDetail.TPlaceReviews.Select(x => new PlaceReviewDto(x)).ToList();
     }
 
     private static double GetLatitude(GeoJsonGeometry<GeoJson2DCoordinates> geometry) => geometry switch {
@@ -55,20 +42,4 @@ public class PlaceDetailDto {
         GeoJsonPolygon<GeoJson2DCoordinates> polygon => polygon.Coordinates.Exterior.Positions.First().X,
         _ => 0 // Default value for unsupported geometry types
     };
-}
-
-public class PlacePhotoDto {
-    public int PhotoId { get; set; }
-    public string Caption { get; set; } = string.Empty;
-    public string FileName { get; set; } = string.Empty;
-    public string FilePath { get; set; } = string.Empty;
-}
-
-public class PlaceReviewDto {
-    public int ReviewId { get; set; }
-    public int Rating { get; set; }
-    public string Comment { get; set; } = string.Empty;
-    public string UserName { get; set; } = string.Empty;
-    public string UserAvatar { get; set; } = string.Empty;
-    public DateTime CreatedDate { get; set; }
 }

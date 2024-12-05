@@ -16,6 +16,8 @@ public static class DependencyInjection {
 
     private static IServiceCollection AddServices(this IServiceCollection services) {
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IReviewService, ReviewService>();
         services.AddScoped<IPlaceService, PlaceService>();
         services.AddScoped<IGeometryService, GeometryService>();
         return services;

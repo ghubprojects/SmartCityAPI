@@ -50,6 +50,7 @@ public static class DependencyInjection {
         services.AddScoped<IPlaceDetailRepository, PlaceDetailRepository>();
         services.AddScoped<IPlaceTypeRepository, PlaceTypeRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IReviewRepository, ReviewRepository>();
         services.AddScoped<IJwtProvider, JwtProvider>();
         return services;
     }

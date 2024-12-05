@@ -12,7 +12,7 @@ public class PlaceDetailRepository(AppDbContext context) : IPlaceDetailRepositor
         return _context.MPlaceDetails
              .Include(d => d.TPlacePhotos)
              .ThenInclude(p => p.File)
-             .Include(d => d.TPlaceReviews)
+             .Include(d => d.TPlaceReviews.OrderByDescending(r => r.LastModifiedDate))
              .ThenInclude(r => r.User)
              .ThenInclude(u => u.Avatar)
              .AsSplitQuery();
@@ -26,6 +26,10 @@ public class PlaceDetailRepository(AppDbContext context) : IPlaceDetailRepositor
 
     public async Task<MPlaceDetail?> GetDataAsync(string osmId) {
         return await GetQueryAsync().FirstOrDefaultAsync(p => p.OsmId == osmId);
+    }
+
+    public async Task<bool> IsExistAsync(int detailId) {
+        return await _context.MPlaceDetails.AnyAsync(p => p.DetailId == detailId);
     }
 }
 

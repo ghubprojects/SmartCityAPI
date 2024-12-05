@@ -8,16 +8,19 @@ namespace SmartCity.Infrastructure.Repositories;
 public class UserRepository(AppDbContext context) : IUserRepository {
     private readonly AppDbContext _context = context;
 
-    public async Task<MUser?> GetUserByIdAsync(int userId) {
-        return await _context.MUsers
-            .FirstOrDefaultAsync(u => u.UserId.Equals(userId));
+    public async Task<bool> IsExistAsync(int userId) {
+        return await _context.MUsers.AnyAsync(u => u.UserId == userId);
     }
 
-    public async Task<MUser?> GetUserByUsernameAsync(string username) {
-        return await _context.MUsers.SingleOrDefaultAsync(u => u.Username == username);
+    public async Task<MUser?> GetUserAsync(string username) {
+        return await _context.MUsers
+            .Include(x => x.Avatar)
+            .SingleOrDefaultAsync(u => u.Username == username);
     }
 
     public async Task AddUserAsync(MUser user) {
+        var lastId = await _context.MUsers.MaxAsync(u => u.UserId);
+        user.UserId = lastId + 1;
         _context.MUsers.Add(user);
         await _context.SaveChangesAsync();
     }

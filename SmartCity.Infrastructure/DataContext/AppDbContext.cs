@@ -157,7 +157,9 @@ public partial class AppDbContext : DbContext {
             entity.HasIndex(e => e.Username, "m_user_name_key").IsUnique();
 
             entity.Property(e => e.UserId).HasColumnName("user_id");
-            entity.Property(e => e.AvatarId).HasColumnName("avatar_id");
+            entity.Property(e => e.AvatarId)
+                .HasDefaultValue(77)
+                .HasColumnName("avatar_id");
             entity.Property(e => e.CreatedBy)
                 .HasMaxLength(50)
                 .HasColumnName("created_by");

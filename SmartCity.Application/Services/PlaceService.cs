@@ -47,4 +47,9 @@ public class PlaceService(
 
         return result;
     }
+
+    public async Task<List<string>> GetTypesAsync() {
+       var placeTypeDict = await _placeTypeRepository.GetTypeDictAsync();
+        return [.. placeTypeDict.Values.Distinct()];
+    }
 }

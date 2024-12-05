@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Authentication;
 
 namespace SmartCity.WebApi.ExceptionHandlers;
 
@@ -9,18 +8,14 @@ public sealed class GlobalExceptionHandler() : IExceptionHandler {
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken) {
 
         (int status, string detail, IDictionary<string, object?> extensions) = exception switch {
-            UnauthorizedAccessException unauthorizedAccessException =>
-                (StatusCodes.Status401Unauthorized,
-                unauthorizedAccessException.Message,
-                default!),
             ValidationException validationException =>
                 (StatusCodes.Status400BadRequest,
-                "One or more validation errors occurred.",
+                "Dữ liệu không hợp lệ.",
                 new Dictionary<string, object?> {
                     ["errors"] = validationException.Errors.Select(x => new {
                         Property = x.PropertyName,
                         Error = x.ErrorMessage
-                    })
+                    }).Distinct()
                 }),
             BadHttpRequestException badRequestException =>
                 (StatusCodes.Status400BadRequest,
