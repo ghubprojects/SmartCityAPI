@@ -5,7 +5,6 @@ using SmartCity.Application.Features.Places;
 
 namespace SmartCity.WebApi.Controllers;
 
-[Authorize]
 [ApiController]
 [Route("places")]
 public class PlacesController(IMediator mediator) : ControllerBase {

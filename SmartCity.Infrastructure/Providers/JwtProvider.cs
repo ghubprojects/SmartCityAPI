@@ -15,7 +15,7 @@ public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider {
     public string GenerateToken(MUser user) {
         var claims = new Claim[] {
             new(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
-            new(JwtRegisteredClaimNames.Email, user.Email)
+            new(JwtRegisteredClaimNames.Name, user.Username)
         };
 
         var signingCredentials = new SigningCredentials(
@@ -27,7 +27,7 @@ public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider {
             _options.Audience,
             claims,
             null,
-            DateTime.UtcNow.AddMinutes(5),
+            DateTime.UtcNow.AddMinutes(60),
             signingCredentials);
 
         string tokenValue = new JwtSecurityTokenHandler().WriteToken(token);

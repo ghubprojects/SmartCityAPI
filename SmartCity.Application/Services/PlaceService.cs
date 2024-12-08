@@ -19,13 +19,15 @@ public class PlaceService(
         var areaGeometry = !string.IsNullOrEmpty(area)
             ? await _geometryService.GetGeometryAsync(area, lat, lon)
             : null;
+        if (!string.IsNullOrEmpty(area) && areaGeometry is null) {
+            return [];
+        }
 
         var fClass = !string.IsNullOrEmpty(type)
             ? await _placeTypeRepository.GetFClassAsync(type)
             : null;
 
         var pois = await _poiRepository.GetAllAsync(fClass, areaGeometry, lat, lon, distance);
-
         if (pois.Count == 0) {
             return [];
         }
@@ -39,6 +41,7 @@ public class PlaceService(
         var placeTypeDict = await _placeTypeRepository.GetTypeDictAsync();
 
         var result = new List<PlaceDetailDto>();
+        pois = [.. pois.OrderByDescending(x => x.Properties.Name)];
         foreach (var poi in pois) {
             if (poiDetailsDict.TryGetValue(poi.Properties.OsmId, out var poiDetail)) {
                 result.Add(new PlaceDetailDto(poi, poiDetail, placeTypeDict));
@@ -49,7 +52,7 @@ public class PlaceService(
     }
 
     public async Task<List<string>> GetTypesAsync() {
-       var placeTypeDict = await _placeTypeRepository.GetTypeDictAsync();
+        var placeTypeDict = await _placeTypeRepository.GetTypeDictAsync();
         return [.. placeTypeDict.Values.Distinct()];
     }
 }

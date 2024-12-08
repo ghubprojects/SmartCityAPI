@@ -20,14 +20,7 @@ public class LoginRequestHandler(IAuthService authService) : IRequestHandler<Log
 
 public class LoginRequestValidator : AbstractValidator<LoginRequest> {
     public LoginRequestValidator() {
-        RuleFor(x => x.Username)
-            .NotEmpty().WithMessage("Tên người dùng không được để trống.")
-            .MinimumLength(3).WithMessage("Tên người dùng phải có ít nhất 3 ký tự.");
-
-        RuleFor(x => x.Password)
-            .NotEmpty().WithMessage("Mật khẩu không được để trống.")
-            .MinimumLength(6).WithMessage("Mật khẩu phải có ít nhất 6 ký tự.")
-            .Matches(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$")
-            .WithMessage("Mật khẩu phải bao gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 chữ số và 1 ký tự đặc biệt.");
+        RuleFor(x => x.Username).NotEmpty().WithMessage("Tên người dùng không được để trống.");
+        RuleFor(x => x.Password).NotEmpty().WithMessage("Mật khẩu không được để trống.");
     }
 }
